@@ -1,12 +1,12 @@
 # canvas
 
-Live canvases at [canvas.n3wth.com](https://canvas.n3wth.com).
+Canvases at [canvas.n3wth.com](https://canvas.n3wth.com).
 
-A canvas is an artifact: some source, and the running thing that source makes.
-You open the URL and see the preview. Source stays behind a toggle until you
-need it. Convex holds the document, so opening the same link somewhere else is
-not a copy of the canvas, it is the canvas. Change the source in one view and
-every other view re-renders.
+Make a canvas. Share the URL. It updates.
+
+You open the link and see the preview. Source stays behind a toggle until you
+need it. Opening the same link somewhere else is not a copy of the canvas —
+it is the canvas. Change the source in one view and every other view follows.
 
 That is the whole idea. No sign-in, no export step, no build to wait on.
 
@@ -41,12 +41,12 @@ second window next to the first. Type in one.
 
 ## Kinds of canvas
 
-- **HTML** — the source is a whole document. You own `<head>`, styles, scripts.
+- **HTML** — the source is a page. You own `<head>`, styles, scripts.
 - **React** — the source is a component compiled in the browser, ending in
   `render(<Component />)`. React and Babel load from a CDN inside the frame.
 
-Previews run in a sandboxed iframe on an opaque origin, so a canvas cannot
-reach the app around it.
+Previews run in an iframe on an opaque origin, so a canvas cannot reach the
+app around it.
 
 ## Pushing source from outside the browser
 

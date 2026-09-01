@@ -82,9 +82,9 @@ export function CanvasWorkspace({slug}: {slug: string}) {
   const heartbeat = useMutation(api.presence.heartbeat);
   const leave = useMutation(api.presence.leave);
 
-  // Preview is the default surface for a live artifact. Source stays
-  // collapsed until someone asks for it. New autoSaveId so an older
-  // always-open split preference cannot force the editor back open.
+  // Preview is the default surface. Source stays collapsed until someone
+  // asks for it. New autoSaveId so an older always-open split preference
+  // cannot force the editor back open.
   const split = useResizable({
     defaultSize: '40%',
     minSizePx: 280,
