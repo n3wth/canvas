@@ -68,7 +68,7 @@ export function CanvasIndex() {
                     Canvas
                   </Heading>
                   <Text color="secondary">
-                    Make a canvas. Share the URL. It updates.
+                    Make a tool. Share the URL.
                   </Text>
                 </VStack>
 

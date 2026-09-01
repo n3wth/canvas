@@ -2,11 +2,11 @@
 
 Canvases at [canvas.n3wth.com](https://canvas.n3wth.com).
 
-Make a canvas. Share the URL. It updates.
+Make a tool. Share the URL.
 
-You open the link and see the preview. Source stays behind a toggle until you
-need it. Opening the same link somewhere else is not a copy of the canvas —
-it is the canvas. Change the source in one view and every other view follows.
+You open the link and see the running tool. Source stays behind a toggle until
+you need it. Opening the same link somewhere else is not a copy — it is the
+same canvas. Change it in one view and every other view follows.
 
 That is the whole idea. No sign-in, no export step, no build to wait on.
 

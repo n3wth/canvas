@@ -4,10 +4,10 @@ Project-specific guidance for AI coding agents.
 
 ## What this project is
 
-`canvas` is deployed at canvas.n3wth.com. A canvas holds source and the thing
-that source makes. The shareable URL opens on the preview; source is available
-behind a toggle. The document is stored in Convex, so every open view of a
-canvas re-renders when any of them writes.
+`canvas` is deployed at canvas.n3wth.com. A canvas holds source and the tool
+that source makes. The shareable URL opens on the running preview; source is
+available behind a toggle. Every open view follows the shared document, so a
+write in one view re-renders the others.
 
 It is not a whiteboard, a drawing tool, or a diagram editor. There are no
 strokes, shapes, or freehand input anywhere in the product. If you find
