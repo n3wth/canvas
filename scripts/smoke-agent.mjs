@@ -42,12 +42,12 @@ async function req(method, path, body) {
 }
 
 const stamp = new Date().toISOString();
-const source1 = `<!doctype html><html><body style="font-family:system-ui;padding:2rem"><h1>agent smoke</h1><p>${stamp}</p></body></html>`;
-const source2 = `<!doctype html><html><body style="font-family:system-ui;padding:2rem;background:#111;color:#eee"><h1>agent smoke updated</h1><p>${stamp}</p></body></html>`;
+const source1 = `# agent smoke\n\n${stamp}`;
+const source2 = `# agent smoke updated\n\n${stamp}`;
 
 const created = await req('POST', '/agent/v1/canvases', {
   title: `smoke ${stamp}`,
-  kind: 'html',
+  kind: 'markdown',
   source: source1,
 });
 console.log('created', created);

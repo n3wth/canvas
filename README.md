@@ -40,14 +40,10 @@ into `.env.local` on first run, which is the only variable the app needs.
 To see the point of the thing, create a canvas, copy the link, and open it in a
 second window next to the first. Type in one.
 
-## Kinds of canvas
+## What you get
 
-- **HTML** — the source is a page. You own `<head>`, styles, scripts.
-- **React** — the source is a component compiled in the browser, ending in
-  `render(<Component />)`. React and Babel load from a CDN inside the frame.
-
-Previews run in an iframe on an opaque origin, so a canvas cannot reach the
-app around it.
+Interactive markdown by default. Share the URL and open views follow writes.
+Older html/react canvases still render. Source sits behind a quiet icon.
 
 ## Agent / HTTP API
 
@@ -59,13 +55,13 @@ and `AGENTS.md`). Set `CANVAS_AGENT_TOKEN` on the Convex deployment — never in
 curl -sS -X POST "$NEXT_PUBLIC_CONVEX_SITE_URL/agent/v1/canvases" \
   -H "Authorization: Bearer $CANVAS_AGENT_TOKEN" \
   -H 'Content-Type: application/json' \
-  -d '{"title":"Demo","kind":"html","source":"<h1>hi</h1>"}'
+  -d '{"title":"Demo","source":"# Hello\n\nMake a tool, share the URL."}'
 
 # Write (hot-updates https://canvas.n3wth.com/c/{slug})
 curl -sS -X PUT "$NEXT_PUBLIC_CONVEX_SITE_URL/agent/v1/canvases/$SLUG/source" \
   -H "Authorization: Bearer $CANVAS_AGENT_TOKEN" \
   -H 'Content-Type: application/json' \
-  -d '{"source":"<h1>updated</h1>"}'
+  -d '{"source":"# Updated\n\nOpen views follow writes."}'
 ```
 
 Legacy push (same token required once `CANVAS_AGENT_TOKEN` is configured):
@@ -74,7 +70,7 @@ Legacy push (same token required once `CANVAS_AGENT_TOKEN` is configured):
 curl -X POST "$NEXT_PUBLIC_CONVEX_SITE_URL/canvas/source" \
   -H "Authorization: Bearer $CANVAS_AGENT_TOKEN" \
   -H 'Content-Type: application/json' \
-  -d '{"slug":"your-canvas-slug","source":"<h1>pushed</h1>"}'
+  -d '{"slug":"your-canvas-slug","source":"# Pushed"}'
 ```
 
 ## Theme

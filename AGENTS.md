@@ -5,9 +5,9 @@ Project-specific guidance for AI coding agents.
 ## What this project is
 
 `canvas` is deployed at canvas.n3wth.com. A canvas holds source and the tool
-that source makes. The shareable URL opens on the running preview; source is
-available behind a toggle. Every open view follows the shared document, so a
-write in one view re-renders the others.
+that source makes. New canvases are interactive markdown. The shareable URL
+opens on the rendered tool; source is behind a quiet icon. Every open view
+follows the shared document, so a write in one view re-renders the others.
 
 It is not a whiteboard, a drawing tool, or a diagram editor. There are no
 strokes, shapes, or freehand input anywhere in the product. If you find
@@ -71,7 +71,7 @@ Household agents (Cursor, Hermes, Grok Bot, etc.) should load
 | Method | Path | Purpose |
 | --- | --- | --- |
 | GET | `/agent/v1` | Discovery (no auth) |
-| POST | `/agent/v1/canvases` | Create (`title?`, `kind`: `html`\|`react`, `source?`) |
+| POST | `/agent/v1/canvases` | Create (`title?`, `kind?`: `markdown`\|`html`\|`react` default markdown, `source?`) |
 | GET | `/agent/v1/canvases` | List metadata |
 | GET | `/agent/v1/canvases/:slug` | Read source + metadata |
 | PUT | `/agent/v1/canvases/:slug/source` | Replace source (hot-updates watchers) |

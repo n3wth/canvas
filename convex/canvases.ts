@@ -89,12 +89,14 @@ export const getBySlug = query({
 export const create = mutation({
   args: {
     title: v.optional(v.string()),
-    kind: canvasKind,
+    // Defaults to markdown. html/react still accepted for older clients.
+    kind: v.optional(canvasKind),
     source: v.optional(v.string()),
   },
   returns: v.object({slug: v.string()}),
   handler: async (ctx, args) => {
-    const source = args.source ?? starterFor(args.kind);
+    const kind = args.kind ?? 'markdown';
+    const source = args.source ?? starterFor(kind);
     assertSourceFits(source);
 
     const slug = await uniqueSlug(ctx);
@@ -103,7 +105,7 @@ export const create = mutation({
     await ctx.db.insert('canvases', {
       slug,
       title,
-      kind: args.kind,
+      kind,
       source,
       version: 1,
       updatedAt: Date.now(),

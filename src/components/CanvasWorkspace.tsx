@@ -3,13 +3,11 @@
 import {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
   type CSSProperties,
 } from 'react';
 import {useMutation, useQuery} from 'convex/react';
-import {Badge} from '@astryxdesign/core/Badge';
 import {Button} from '@astryxdesign/core/Button';
 import {
   HStack,
@@ -20,19 +18,18 @@ import {
   VStack,
 } from '@astryxdesign/core/Layout';
 import {ResizeHandle, useResizable} from '@astryxdesign/core/Resizable';
-import {MoreMenu} from '@astryxdesign/core/MoreMenu';
+import {IconButton} from '@astryxdesign/core/IconButton';
 import {Spinner} from '@astryxdesign/core/Spinner';
-import {StatusDot} from '@astryxdesign/core/StatusDot';
 import {Text} from '@astryxdesign/core/Text';
 import {api} from '@/../convex/_generated/api';
 import {buildPreviewDocument} from '@/lib/preview';
 import {useViewer} from '@/lib/identity';
 import {IslandNav} from '@/components/IslandNav';
+import {ConnectDialog} from '@/components/ConnectDialog';
+import {ConnectIcon, LinkIcon, SourceIcon} from '@/components/icons';
 
-/** Mirrors PRESENCE_TTL_MS in convex/presence.ts. */
-const PRESENCE_TTL_MS = 30_000;
+/** Presence heartbeats stay; chrome does not show viewers. */
 const SAVE_DEBOUNCE_MS = 400;
-const PREVIEW_DEBOUNCE_MS = 250;
 const HEARTBEAT_MS = 10_000;
 
 // Layout height="fill" resolves against a definite height, and the host
@@ -78,7 +75,6 @@ type SaveStatus = 'clean' | 'pending' | 'synced';
 export function CanvasWorkspace({slug}: {slug: string}) {
   const viewer = useViewer();
   const canvas = useQuery(api.canvases.getBySlug, {slug});
-  const presence = useQuery(api.presence.forCanvas, {slug});
   const setSource = useMutation(api.canvases.setSource);
   const heartbeat = useMutation(api.presence.heartbeat);
   const leave = useMutation(api.presence.leave);
@@ -97,13 +93,11 @@ export function CanvasWorkspace({slug}: {slug: string}) {
   const [previewSource, setPreviewSource] = useState<string | null>(null);
   const [status, setStatus] = useState<SaveStatus>('clean');
   const [copied, setCopied] = useState(false);
+  const [connectOpen, setConnectOpen] = useState(false);
   // Highest document version this tab has accounted for. Without it, our own
   // write coming back through the subscription looks like a remote edit and
   // would reset the cursor mid-keystroke.
   const [seenVersion, setSeenVersion] = useState(0);
-  // Clock for ageing out presence rows. Held in state so nothing reads the
-  // real clock during render.
-  const [now, setNow] = useState(0);
 
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -125,21 +119,6 @@ export function CanvasWorkspace({slug}: {slug: string}) {
 
   // Rebuild the frame a beat after typing stops, so a keystroke does not tear
   // down and re-run the whole preview document.
-  useEffect(() => {
-    if (draft === null || draft === previewSource) return;
-    const timer = setTimeout(() => setPreviewSource(draft), PREVIEW_DEBOUNCE_MS);
-    return () => clearTimeout(timer);
-  }, [draft, previewSource]);
-
-  useEffect(() => {
-    const tick = () => setNow(Date.now());
-    const first = setTimeout(tick, 0);
-    const interval = setInterval(tick, 5_000);
-    return () => {
-      clearTimeout(first);
-      clearInterval(interval);
-    };
-  }, []);
 
   useEffect(() => {
     if (!viewer) return;
@@ -188,14 +167,6 @@ export function CanvasWorkspace({slug}: {slug: string}) {
     setTimeout(() => setCopied(false), 1600);
   }, []);
 
-  const others = useMemo(() => {
-    if (!presence || !viewer || now === 0) return [];
-    const cutoff = now - PRESENCE_TTL_MS;
-    return presence.filter(
-      (row) => row.visitorId !== viewer.id && row.lastSeenAt > cutoff,
-    );
-  }, [presence, viewer, now]);
-
   if (canvas === undefined) {
     return (
       <VStack style={pageStyle} hAlign="center" vAlign="center">
@@ -216,58 +187,40 @@ export function CanvasWorkspace({slug}: {slug: string}) {
     );
   }
 
-  const kindLabel = canvas.kind === 'html' ? 'HTML' : 'React';
 
   return (
-    <VStack className="workspace-with-island" gap={0}>
+    <VStack className="workspace-with-island operate-page" gap={0}>
       <IslandNav
         title={canvas.title}
-        titleMeta={
-          <Badge
-            label={kindLabel}
-            variant={canvas.kind === 'html' ? 'orange' : 'cyan'}
-          />
-        }
         endContent={
-          <HStack gap={3} vAlign="center">
-            {others.length > 0 && (
-              <HStack gap={1.5} vAlign="center">
-                <StatusDot
-                  variant="success"
-                  label={`${others.length} other ${
-                    others.length === 1 ? 'view' : 'views'
-                  } open`}
-                />
-                <Text type="supporting">
-                  {others.length} other{' '}
-                  {others.length === 1 ? 'view' : 'views'}
-                </Text>
-              </HStack>
-            )}
-            <Text type="supporting" hasTabularNumbers>
-              {status === 'pending' ? 'saving' : `v${canvas.version}`}
-            </Text>
-            <MoreMenu
-              label="Canvas options"
+          <HStack gap={1} vAlign="center" className="workspace-actions">
+            {status === 'pending' ? (
+              <Text type="supporting">saving</Text>
+            ) : null}
+            <IconButton
+              label={copied ? 'Link copied' : 'Copy link'}
+              icon={<LinkIcon />}
               variant="ghost"
               size="sm"
-              placement="below"
-              alignment="end"
-              items={[
-                {
-                  id: 'toggle-source',
-                  label: split.isCollapsed ? 'Show source' : 'Hide source',
-                  onClick: () =>
-                    split.isCollapsed ? split.expand() : split.collapse(),
-                },
-                {
-                  id: 'copy-link',
-                  label: copied ? 'Link copied' : 'Copy link',
-                  onClick: () => {
-                    void handleCopyLink();
-                  },
-                },
-              ]}
+              onClick={() => {
+                void handleCopyLink();
+              }}
+            />
+            <IconButton
+              label={split.isCollapsed ? 'Show source' : 'Hide source'}
+              icon={<SourceIcon />}
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                split.isCollapsed ? split.expand() : split.collapse()
+              }
+            />
+            <IconButton
+              label="Connect"
+              icon={<ConnectIcon />}
+              variant="ghost"
+              size="sm"
+              onClick={() => setConnectOpen(true)}
             />
           </HStack>
         }
@@ -289,12 +242,7 @@ export function CanvasWorkspace({slug}: {slug: string}) {
                   height="fill"
                   header={
                     <LayoutHeader hasDivider>
-                      <HStack gap={3} vAlign="center" hAlign="between">
-                        <Text type="label">Source</Text>
-                        <Text type="supporting">
-                          {canvas.kind === 'html' ? 'HTML' : 'React'}
-                        </Text>
-                      </HStack>
+                      <Text type="label">Source</Text>
                     </LayoutHeader>
                   }
                   content={
@@ -326,15 +274,6 @@ export function CanvasWorkspace({slug}: {slug: string}) {
             <Layout
               height="fill"
               style={fillStyle}
-              header={
-                split.isCollapsed ? undefined : (
-                  <LayoutHeader hasDivider>
-                    <HStack gap={3} vAlign="center" hAlign="between">
-                      <Text type="label">Preview</Text>
-                    </HStack>
-                  </LayoutHeader>
-                )
-              }
               content={
                 <LayoutContent padding={0} isScrollable={false}>
                   <iframe
@@ -351,6 +290,11 @@ export function CanvasWorkspace({slug}: {slug: string}) {
             />
           </LayoutContent>
         }
+      />
+      <ConnectDialog
+        slug={slug}
+        isOpen={connectOpen}
+        onOpenChange={setConnectOpen}
       />
     </VStack>
   );

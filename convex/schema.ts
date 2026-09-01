@@ -1,13 +1,19 @@
 import {defineSchema, defineTable} from 'convex/server';
 import {v} from 'convex/values';
 
-export const canvasKind = v.union(v.literal('html'), v.literal('react'));
+export const canvasKind = v.union(
+  v.literal('markdown'),
+  v.literal('html'),
+  v.literal('react'),
+);
 
 export default defineSchema({
   /**
    * A canvas: source plus the metadata needed to render it.
    * Convex is the source of truth — every view renders from this row, so a
    * write here hot-updates every open preview.
+   *
+   * New canvases are markdown. html/react remain so older rows still render.
    */
   canvases: defineTable({
     // Short, URL-safe public id. Shared links use this, not the Convex _id.
@@ -28,6 +34,7 @@ export default defineSchema({
   /**
    * Best-effort presence. Rows are written by a heartbeat and swept by the
    * next heartbeat, so a client that closes the tab without cleanup ages out.
+   * Kept for collab; not shown in workspace chrome.
    */
   presence: defineTable({
     canvasId: v.id('canvases'),
