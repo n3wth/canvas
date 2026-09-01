@@ -16,16 +16,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'canvas',
+  title: 'n3wth/canvas',
   description:
-    'Live canvases. Write source, get a running preview, share the URL — every view stays in sync.',
+    'Live artifact canvases. Open a URL to see it run; show source when you need it. Every view stays in sync.',
   metadataBase: new URL('https://canvas.n3wth.com'),
+  authors: [{name: 'Oliver Newth', url: 'https://n3wth.com'}],
   openGraph: {
-    title: 'canvas',
+    title: 'n3wth/canvas',
     description:
-      'Live canvases. Write source, get a running preview, share the URL — every view stays in sync.',
+      'Live artifact canvases. Open a URL to see it run; show source when you need it. Every view stays in sync.',
     url: 'https://canvas.n3wth.com',
-    siteName: 'canvas',
+    siteName: 'n3wth/canvas',
+  },
+  other: {
+    'theme-color': '#08090b',
   },
 };
 
@@ -39,6 +43,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        <meta name="theme-color" content="#08090b" />
         <link rel="preconnect" href="https://api.fontshare.com" />
         <link
           rel="stylesheet"
@@ -46,6 +51,9 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <a href="#main" className="skip-link">
+          Skip to content
+        </a>
         <Providers>{children}</Providers>
       </body>
     </html>

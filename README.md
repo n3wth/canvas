@@ -3,10 +3,10 @@
 Live canvases at [canvas.n3wth.com](https://canvas.n3wth.com).
 
 A canvas is an artifact: some source, and the running thing that source makes.
-You write HTML or a React component on the left, it renders on the right, and
-the URL is the share button. Convex holds the document, so opening the same
-link somewhere else is not a copy of the canvas, it is the canvas. Change the
-source in one view and every other view re-renders.
+You open the URL and see the preview. Source stays behind a toggle until you
+need it. Convex holds the document, so opening the same link somewhere else is
+not a copy of the canvas, it is the canvas. Change the source in one view and
+every other view re-renders.
 
 That is the whole idea. No sign-in, no export step, no build to wait on.
 

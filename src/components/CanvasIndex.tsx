@@ -25,11 +25,12 @@ import {StackItem} from '@astryxdesign/core/Stack';
 import {Text} from '@astryxdesign/core/Text';
 import {TextInput} from '@astryxdesign/core/TextInput';
 import {Timestamp} from '@astryxdesign/core/Timestamp';
-import {TopNav, TopNavHeading} from '@astryxdesign/core/TopNav';
 import {api} from '@/../convex/_generated/api';
 import type {CanvasKind} from '@/lib/preview';
+import {IslandNav} from '@/components/IslandNav';
+import {ProductFooter} from '@/components/ProductFooter';
 
-const pageStyle: CSSProperties = {height: '100dvh'};
+const fillStyle: CSSProperties = {flex: 1, minHeight: 0};
 
 export function CanvasIndex() {
   const router = useRouter();
@@ -52,130 +53,122 @@ export function CanvasIndex() {
   }
 
   return (
-    <Layout
-      style={pageStyle}
-      height="fill"
-      contentWidth={960}
-      header={
-        <TopNav
-          label="Canvas"
-          heading={<TopNavHeading heading="canvas" headingHref="/" />}
-          endContent={
-            <Button
-              label="hey@n3wth.com"
-              variant="ghost"
-              size="sm"
-              href="mailto:hey@n3wth.com"
-            />
-          }
-        />
-      }
-      content={
-        <LayoutContent padding={8}>
-          <VStack gap={8}>
-            <VStack gap={2} maxWidth={620}>
-              <Heading level={1} type="display-2">
-                Live canvases
-              </Heading>
-              <Text color="secondary">
-                Write source on the left, watch it run on the right. The
-                document lives in Convex, so the URL is the share button: open
-                it twice and both views track the same canvas as it changes.
-              </Text>
-            </VStack>
-
-            <VStack gap={3}>
-              <Heading level={2}>New canvas</Heading>
-              <Section variant="muted">
-                <HStack gap={3} vAlign="end" wrap="wrap">
-                  <StackItem size="fill">
-                    <TextInput
-                      label="Title"
-                      placeholder="Untitled canvas"
-                      width="100%"
-                      value={title}
-                      onChange={setTitle}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter' && !isCreating) {
-                          void handleCreate();
-                        }
-                      }}
-                    />
-                  </StackItem>
-                  <SegmentedControl
-                    label="Canvas kind"
-                    value={kind}
-                    onChange={(next) => setKind(next as CanvasKind)}
-                  >
-                    <SegmentedControlItem value="html" label="HTML" />
-                    <SegmentedControlItem value="react" label="React" />
-                  </SegmentedControl>
-                  <Button
-                    label="Create canvas"
-                    variant="primary"
-                    isLoading={isCreating}
-                    onClick={handleCreate}
-                  />
-                </HStack>
-              </Section>
-            </VStack>
-
-            <VStack gap={3}>
-              <Heading level={2}>
-                {canvases ? `Canvases (${canvases.length})` : 'Canvases'}
-              </Heading>
-
-              {canvases === undefined && (
-                <VStack padding={8} hAlign="center">
-                  <Spinner label="Loading canvases" />
+    <VStack className="page-with-island" gap={0}>
+      <IslandNav />
+      <Layout
+        style={fillStyle}
+        height="fill"
+        contentWidth={960}
+        content={
+          <LayoutContent padding={8}>
+            <main id="main">
+              <VStack gap={8}>
+                <VStack gap={2} maxWidth={620}>
+                  <Heading level={1} type="display-2">
+                    Live canvases
+                  </Heading>
+                  <Text color="secondary">
+                    Each canvas is a live artifact: the URL runs the preview,
+                    and source is there when you need it. Convex keeps every
+                    open view in sync, so the link is the share button.
+                  </Text>
                 </VStack>
-              )}
 
-              {canvases?.length === 0 && (
-                <EmptyState
-                  title="No canvases yet"
-                  description="Create one above. HTML gives you a whole document to own; React gives you a component compiled in the browser."
-                />
-              )}
-
-              {canvases && canvases.length > 0 && (
-                <Grid columns={{minWidth: 240, repeat: 'fit'}} gap={3}>
-                  {canvases.map((canvas) => (
-                    <ClickableCard
-                      key={canvas._id}
-                      label={`Open ${canvas.title}`}
-                      href={`/c/${canvas.slug}`}
-                    >
-                      <VStack gap={3}>
-                        <HStack gap={2} vAlign="center" hAlign="between">
-                          <Text weight="medium" maxLines={1}>
-                            {canvas.title}
-                          </Text>
-                          <Badge
-                            label={canvas.kind === 'html' ? 'HTML' : 'React'}
-                            variant={
-                              canvas.kind === 'html' ? 'orange' : 'cyan'
+                <VStack gap={3}>
+                  <Heading level={2}>New canvas</Heading>
+                  <Section variant="muted">
+                    <HStack gap={3} vAlign="end" wrap="wrap">
+                      <StackItem size="fill">
+                        <TextInput
+                          label="Title"
+                          placeholder="Untitled canvas"
+                          width="100%"
+                          value={title}
+                          onChange={setTitle}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter' && !isCreating) {
+                              void handleCreate();
                             }
-                          />
-                        </HStack>
-                        <HStack gap={2} vAlign="center" hAlign="between">
-                          <Timestamp
-                            value={new Date(canvas.updatedAt).toISOString()}
-                            format="relative_short"
-                          />
-                          <Text type="supporting" hasTabularNumbers>
-                            v{canvas.version}
-                          </Text>
-                        </HStack>
-                      </VStack>
-                    </ClickableCard>
-                  ))}
-                </Grid>
-              )}
-            </VStack>
-          </VStack>
-        </LayoutContent>
-      }
-    />
+                          }}
+                        />
+                      </StackItem>
+                      <SegmentedControl
+                        label="Canvas kind"
+                        value={kind}
+                        onChange={(next) => setKind(next as CanvasKind)}
+                      >
+                        <SegmentedControlItem value="html" label="HTML" />
+                        <SegmentedControlItem value="react" label="React" />
+                      </SegmentedControl>
+                      <Button
+                        label="Create canvas"
+                        variant="primary"
+                        isLoading={isCreating}
+                        onClick={handleCreate}
+                      />
+                    </HStack>
+                  </Section>
+                </VStack>
+
+                <VStack gap={3}>
+                  <Heading level={2}>
+                    {canvases ? `Canvases (${canvases.length})` : 'Canvases'}
+                  </Heading>
+
+                  {canvases === undefined && (
+                    <VStack padding={8} hAlign="center">
+                      <Spinner label="Loading canvases" />
+                    </VStack>
+                  )}
+
+                  {canvases?.length === 0 && (
+                    <EmptyState
+                      title="No canvases yet"
+                      description="Create one above. HTML gives you a whole document to own; React gives you a component compiled in the browser."
+                    />
+                  )}
+
+                  {canvases && canvases.length > 0 && (
+                    <Grid columns={{minWidth: 240, repeat: 'fit'}} gap={3}>
+                      {canvases.map((canvas) => (
+                        <ClickableCard
+                          key={canvas._id}
+                          label={`Open ${canvas.title}`}
+                          href={`/c/${canvas.slug}`}
+                        >
+                          <VStack gap={3}>
+                            <HStack gap={2} vAlign="center" hAlign="between">
+                              <Text weight="medium" maxLines={1}>
+                                {canvas.title}
+                              </Text>
+                              <Badge
+                                label={canvas.kind === 'html' ? 'HTML' : 'React'}
+                                variant={
+                                  canvas.kind === 'html' ? 'orange' : 'cyan'
+                                }
+                              />
+                            </HStack>
+                            <HStack gap={2} vAlign="center" hAlign="between">
+                              <Timestamp
+                                value={new Date(canvas.updatedAt).toISOString()}
+                                format="relative_short"
+                              />
+                              <Text type="supporting" hasTabularNumbers>
+                                v{canvas.version}
+                              </Text>
+                            </HStack>
+                          </VStack>
+                        </ClickableCard>
+                      ))}
+                    </Grid>
+                  )}
+                </VStack>
+              </VStack>
+            </main>
+          </LayoutContent>
+        }
+      />
+      <ProductFooter />
+    </VStack>
   );
 }
