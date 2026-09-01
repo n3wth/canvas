@@ -106,9 +106,9 @@ npm run build
 ## Documentation and branding
 
 This file plus `skills/canvas/SKILL.md` and `llms.txt` are the agent-facing
-docs. Do not add per-vendor instruction files (`CLAUDE.md`, etc.); if a tool
-generates one, fold useful content into `AGENTS.md` and delete it. Keep vendor
-names out of user-facing copy. Contact is hey@n3wth.com.
+docs. Do not add per-vendor instruction files; if a tool generates one, fold
+useful content into `AGENTS.md` and delete it. Keep vendor names out of
+user-facing copy. Contact is hey@n3wth.com. Code lives at github.com/n3wth.
 
 <!-- ASTRYX:START -->
 Astryx v0.5.2 · 163 components

@@ -6,6 +6,7 @@ import {Text} from '@astryxdesign/core/Text';
 
 const links = [
   {label: 'Contact', href: 'mailto:hey@n3wth.com'},
+  {label: 'GitHub', href: 'https://github.com/n3wth'},
   {label: 'n3wth.com', href: 'https://n3wth.com'},
   {label: 'garden', href: 'https://garden.n3wth.com'},
   {label: 'kit', href: 'https://kit.n3wth.com'},

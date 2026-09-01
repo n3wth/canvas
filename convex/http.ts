@@ -80,7 +80,7 @@ http.route({
   }),
 });
 
-/** Create a canvas. Returns the live share URL. */
+/** Create a canvas. Returns the share URL. */
 http.route({
   path: '/agent/v1/canvases',
   method: 'POST',
