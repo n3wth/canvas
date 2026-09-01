@@ -86,16 +86,22 @@ Convex and the Next app deploy separately.
 npx convex deploy
 ```
 
-**Vercel.** Import the repo, then set the build command so Convex deploys as
-part of the same step and the app builds against the deployment it just made:
+**Vercel.** `vercel.json` already points the build at
+`scripts/vercel-build.mjs`, so there is nothing to configure in the dashboard.
+That script deploys Convex and builds the frontend against the deployment it
+just made, which keeps the two from drifting:
 
 ```
 npx convex deploy --cmd 'npm run build'
 ```
 
-Set `CONVEX_DEPLOY_KEY` in the Vercel project from the Convex dashboard
-(Settings, Deploy keys). `NEXT_PUBLIC_CONVEX_URL` is set by that command, so
-you do not add it by hand.
+It only does that when `CONVEX_DEPLOY_KEY` is set. Add it in the Vercel project
+from the Convex dashboard, under Settings, Deploy keys. You do not set
+`NEXT_PUBLIC_CONVEX_URL` by hand; the deploy supplies it.
+
+Without the key the build still succeeds and the site renders a "no backend
+connected" page, so a missing variable is a visible state rather than a red
+deploy. The next build picks the backend up on its own once the key is there.
 
 **Domain.** Add `canvas.n3wth.com` to the Vercel project and point a CNAME at
 `cname.vercel-dns.com`. Vercel issues the certificate once the record resolves.
