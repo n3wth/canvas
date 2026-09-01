@@ -1,0 +1,23 @@
+@import '@astryxdesign/core/reset.css';
+@import '@astryxdesign/core/astryx.css';
+@import '../theme/n3wth.css';
+
+/*
+ * Font families named by the n3wth theme. Geist Sans and Geist Mono are
+ * self-hosted by next/font in layout.tsx, which defines --font-geist-sans and
+ * --font-geist-mono. Satoshi is served by Fontshare (linked in layout.tsx), so
+ * we only need to point the token at the loaded family name.
+ */
+:root {
+  --font-satoshi: 'Satoshi';
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-background-body);
+  color: var(--color-text-primary);
+}
