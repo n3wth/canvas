@@ -5,7 +5,7 @@ export const canvasKind = v.union(v.literal('html'), v.literal('react'));
 
 export default defineSchema({
   /**
-   * A canvas is an artifact: source plus the metadata needed to render it.
+   * A canvas: source plus the metadata needed to render it.
    * Convex is the source of truth — every view renders from this row, so a
    * write here hot-updates every open preview.
    */

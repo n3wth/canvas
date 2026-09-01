@@ -23,10 +23,10 @@ import {ResizeHandle, useResizable} from '@astryxdesign/core/Resizable';
 import {Spinner} from '@astryxdesign/core/Spinner';
 import {StatusDot} from '@astryxdesign/core/StatusDot';
 import {Text} from '@astryxdesign/core/Text';
-import {TopNav, TopNavHeading} from '@astryxdesign/core/TopNav';
 import {api} from '@/../convex/_generated/api';
 import {buildPreviewDocument} from '@/lib/preview';
 import {useViewer} from '@/lib/identity';
+import {IslandNav} from '@/components/IslandNav';
 
 /** Mirrors PRESENCE_TTL_MS in convex/presence.ts. */
 const PRESENCE_TTL_MS = 30_000;
@@ -37,6 +37,7 @@ const HEARTBEAT_MS = 10_000;
 // Layout height="fill" resolves against a definite height, and the host
 // document does not set one, so the page anchors the viewport height itself.
 const pageStyle: CSSProperties = {height: '100dvh'};
+const workspaceBodyStyle: CSSProperties = {flex: 1, minHeight: 0};
 
 // A full-bleed code surface. Astryx TextArea is a bordered, labelled form
 // field, which is the wrong shape for an editor that owns its whole pane.
@@ -81,10 +82,15 @@ export function CanvasWorkspace({slug}: {slug: string}) {
   const heartbeat = useMutation(api.presence.heartbeat);
   const leave = useMutation(api.presence.leave);
 
+  // Preview is the default surface. Source stays collapsed until someone
+  // asks for it. New autoSaveId so an older always-open split preference
+  // cannot force the editor back open.
   const split = useResizable({
-    defaultSize: '50%',
+    defaultSize: '40%',
     minSizePx: 280,
-    autoSaveId: 'canvas.split',
+    collapsible: true,
+    defaultIsCollapsed: true,
+    autoSaveId: 'canvas.source-pane',
   });
 
   const [draft, setDraft] = useState<string | null>(null);
@@ -213,124 +219,131 @@ export function CanvasWorkspace({slug}: {slug: string}) {
   const kindLabel = canvas.kind === 'html' ? 'HTML' : 'React';
 
   return (
-    <Layout
-      style={pageStyle}
-      height="fill"
-      header={
-        <TopNav
-          label="Canvas"
-          heading={
-            <TopNavHeading
-              superheading="canvas"
-              superheadingHref="/"
-              heading={canvas.title}
-              headerEndContent={
-                <Badge
-                  label={kindLabel}
-                  variant={canvas.kind === 'html' ? 'orange' : 'cyan'}
+    <VStack className="workspace-with-island" gap={0}>
+      <IslandNav
+        title={canvas.title}
+        titleMeta={
+          <Badge
+            label={kindLabel}
+            variant={canvas.kind === 'html' ? 'orange' : 'cyan'}
+          />
+        }
+        endContent={
+          <HStack gap={3} vAlign="center">
+            {others.length > 0 && (
+              <HStack gap={1.5} vAlign="center">
+                <StatusDot
+                  variant="success"
+                  label={`${others.length} other ${
+                    others.length === 1 ? 'view' : 'views'
+                  } open`}
                 />
+                <Text type="supporting">
+                  {others.length} other{' '}
+                  {others.length === 1 ? 'view' : 'views'}
+                </Text>
+              </HStack>
+            )}
+            <Text type="supporting" hasTabularNumbers>
+              {status === 'pending' ? 'saving' : `v${canvas.version}`}
+            </Text>
+            <Button
+              label={split.isCollapsed ? 'Show source' : 'Hide source'}
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                split.isCollapsed ? split.expand() : split.collapse()
               }
             />
-          }
-          endContent={
-            <HStack gap={4} vAlign="center">
-              {others.length > 0 && (
-                <HStack gap={1.5} vAlign="center">
-                  <StatusDot
-                    variant="success"
-                    label={`${others.length} other ${
-                      others.length === 1 ? 'view' : 'views'
-                    } open`}
-                  />
-                  <Text type="supporting">
-                    {others.length} other {others.length === 1 ? 'view' : 'views'}
-                  </Text>
-                </HStack>
-              )}
-              <Text type="supporting" hasTabularNumbers>
-                {status === 'pending' ? 'saving' : `v${canvas.version}`}
-              </Text>
-              <Button
-                label={copied ? 'Link copied' : 'Copy link'}
-                variant="secondary"
-                size="sm"
-                onClick={handleCopyLink}
+            <Button
+              label={copied ? 'Link copied' : 'Copy link'}
+              variant="secondary"
+              size="sm"
+              onClick={handleCopyLink}
+            />
+          </HStack>
+        }
+      />
+      <Layout
+        className="workspace-body"
+        style={workspaceBodyStyle}
+        height="fill"
+        start={
+          split.isCollapsed ? undefined : (
+            <>
+              <LayoutPanel
+                width={split.size}
+                padding={0}
+                isScrollable={false}
+                label="Source"
+              >
+                <Layout
+                  height="fill"
+                  header={
+                    <LayoutHeader hasDivider>
+                      <HStack gap={3} vAlign="center" hAlign="between">
+                        <Text type="label">Source</Text>
+                        <Text type="supporting">
+                          {canvas.kind === 'html' ? 'HTML' : 'React'}
+                        </Text>
+                      </HStack>
+                    </LayoutHeader>
+                  }
+                  content={
+                    <LayoutContent padding={0} isScrollable={false}>
+                      <textarea
+                        style={editorStyle}
+                        value={draft ?? ''}
+                        onChange={(event) => handleChange(event.target.value)}
+                        spellCheck={false}
+                        autoCapitalize="off"
+                        autoCorrect="off"
+                        aria-label="Canvas source"
+                      />
+                    </LayoutContent>
+                  }
+                />
+              </LayoutPanel>
+              <ResizeHandle
+                direction="horizontal"
+                hasDivider
+                resizable={split.props}
+                label="Resize source pane"
               />
-            </HStack>
-          }
-        />
-      }
-      start={
-        <>
-          <LayoutPanel
-            width={split.size}
-            padding={0}
-            isScrollable={false}
-            label="Source"
-          >
+            </>
+          )
+        }
+        content={
+          <LayoutContent padding={0} isScrollable={false} label="Preview">
             <Layout
               height="fill"
+              style={fillStyle}
               header={
-                <LayoutHeader hasDivider>
-                  <HStack gap={3} vAlign="center" hAlign="between">
-                    <Text type="label">Source</Text>
-                    <Text type="supporting">
-                      {canvas.kind === 'html'
-                        ? 'a whole HTML document'
-                        : 'JSX, ending in render(<Component />)'}
-                    </Text>
-                  </HStack>
-                </LayoutHeader>
+                split.isCollapsed ? undefined : (
+                  <LayoutHeader hasDivider>
+                    <HStack gap={3} vAlign="center" hAlign="between">
+                      <Text type="label">Preview</Text>
+                    </HStack>
+                  </LayoutHeader>
+                )
               }
               content={
                 <LayoutContent padding={0} isScrollable={false}>
-                  <textarea
-                    style={editorStyle}
-                    value={draft ?? ''}
-                    onChange={(event) => handleChange(event.target.value)}
-                    spellCheck={false}
-                    autoCapitalize="off"
-                    autoCorrect="off"
-                    aria-label="Canvas source"
+                  <iframe
+                    style={frameStyle}
+                    title={`${canvas.title} preview`}
+                    sandbox="allow-scripts allow-modals allow-forms allow-popups"
+                    srcDoc={buildPreviewDocument(
+                      canvas.kind,
+                      previewSource ?? '',
+                    )}
                   />
                 </LayoutContent>
               }
             />
-          </LayoutPanel>
-          <ResizeHandle
-            direction="horizontal"
-            hasDivider
-            resizable={split.props}
-            label="Resize source pane"
-          />
-        </>
-      }
-      content={
-        <LayoutContent padding={0} isScrollable={false} label="Preview">
-          <Layout
-            height="fill"
-            style={fillStyle}
-            header={
-              <LayoutHeader hasDivider>
-                <HStack gap={3} vAlign="center" hAlign="between">
-                  <Text type="label">Preview</Text>
-                  <Text type="supporting">sandboxed, live</Text>
-                </HStack>
-              </LayoutHeader>
-            }
-            content={
-              <LayoutContent padding={0} isScrollable={false}>
-                <iframe
-                  style={frameStyle}
-                  title={`${canvas.title} preview`}
-                  sandbox="allow-scripts allow-modals allow-forms allow-popups"
-                  srcDoc={buildPreviewDocument(canvas.kind, previewSource ?? '')}
-                />
-              </LayoutContent>
-            }
-          />
-        </LayoutContent>
-      }
-    />
+          </LayoutContent>
+        }
+      />
+    </VStack>
   );
 }
