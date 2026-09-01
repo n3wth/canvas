@@ -19,51 +19,40 @@ editor is a draft view of a Convex document and follows it.
 ## Layout of the code
 
 ```
-src/app/            Next.js App Router. layout.tsx loads fonts and providers.
-  providers.tsx     Convex client, Astryx LinkProvider, Astryx Theme (dark).
-  page.tsx          Canvas index.
-  c/[slug]/page.tsx One canvas; resolves the slug and renders the workspace.
-src/components/     CanvasIndex (list + create), CanvasWorkspace (two panes).
-src/lib/preview.ts  Turns stored source into the document the iframe runs.
-src/lib/identity.ts Per-tab viewer id. sessionStorage on purpose, see below.
-src/theme/          n3wthTheme.ts is the source; n3wth.{css,js,d.ts} are built.
-convex/             schema, canvases, presence, http (external source push).
+src/app/            Next.js App Router
+  layout.tsx        Fonts + providers
+  page.tsx          Canvas index
+  c/[slug]/page.tsx Canvas by slug
+src/components/     CanvasIndex, CanvasWorkspace
+src/lib/            preview.ts (source→iframe), identity.ts (per-tab id)
+src/theme/          n3wthTheme.ts → generated n3wth.{css,js,d.ts}
+convex/             schema.ts, canvases.ts, presence.ts, http.ts
+skills/canvas/SKILL.md  Agent skill (HTTP API docs)
 ```
 
-## Rules that are easy to get wrong
+## Agent HTTP routes (`convex/http.ts`)
 
-**The theme CSS is generated.** `src/theme/n3wth.css`, `n3wth.js`, and
-`n3wth.d.ts` come from `npm run theme:build` reading `n3wthTheme.ts`. Never edit
-them; change the source and rebuild. `npm run theme:check` fails if they are
-stale. Fonts are named by the theme as `var(--font-*)` and loaded in
-`layout.tsx` (Geist via next/font, Satoshi via Fontshare) — Astryx sets font
-tokens but never loads a font.
+Base: `$CANVAS_SITE_URL` (Convex site host). Auth: `Bearer $CANVAS_AGENT_TOKEN` when set.
 
-**Viewer identity is per tab, not per browser.** `src/lib/identity.ts` uses
-sessionStorage. localStorage is shared across tabs on one origin, which would
-make two tabs of the same canvas look like one viewer and break the check that
-distinguishes a remote edit from this tab's own write echoing back.
+| Method | Path | Body |
+|--------|------|------|
+| POST | `/agent/v1/canvases` | `{title?, kind: "html"|"react"|"markdown", source?}` |
+| GET | `/agent/v1/canvases` | — |
+| GET | `/agent/v1/canvases/:slug` | — |
+| PUT | `/agent/v1/canvases/:slug/source` | `{source}` |
 
-**Echo suppression is load-bearing.** `CanvasWorkspace` tracks the highest
-version it has seen and the id of the last writer. A subscription update is
-adopted into the editor only when the version is newer *and* the writer was
-someone else. Remove either half and typing fights itself.
+## Add a markdown canvas
 
-**Queries must not read the clock.** `convex/presence.ts` returns every
-presence row and lets the client drop stale ones. A query calling `Date.now()`
-can never be cached or reused by Convex. Staleness sweeping happens in the
-heartbeat mutation, where reading the clock is fine.
+1. Add `"markdown"` to `canvasKind` in `convex/schema.ts`
+2. Add starter template in `convex/lib/templates.ts`
+3. Add preview renderer in `src/lib/preview.ts` (markdown→HTML)
+4. Update http.ts validation if needed
 
-**Viewing is public; agent writes should be token-gated in production.** Canvases
-are public to whoever holds the share URL (`https://canvas.n3wth.com/c/{slug}`),
-and browser Convex functions still do not call `ctx.auth`. Slugs are random and
-unguessable. The machine interface under `/agent/v1/*` accepts
-`Authorization: Bearer $CANVAS_AGENT_TOKEN` when that env is set on the Convex
-deployment (`npx convex env set CANVAS_AGENT_TOKEN <value>`). When the token is
-unset, those routes stay open (same trust model as the public mutations) so
-local/dev keep working — set the token in production.
+## Share URL
 
-## Agent interface
+```
+https://canvas.n3wth.com/c/{slug}
+```
 
 Household agents (Cursor, Hermes, Grok Bot, etc.) should load
 `skills/canvas/SKILL.md` and call the Convex HTTP API — not drive the browser.
@@ -94,58 +83,25 @@ Also see root `llms.txt`. Contact: hey@n3wth.com.
 ## Commands
 
 ```bash
-npx convex dev        # backend; also generates convex/_generated
-npm run dev           # Next dev server
-npm run typecheck
-npm run lint
-npm run theme:build   # after editing src/theme/n3wthTheme.ts
-npm run theme:check   # verify generated theme matches its source
-npm run build
+npx convex dev        # backend + codegen
+npm run dev           # Next dev
+npm run theme:build   # after editing n3wthTheme.ts
+npm run theme:check   # verify theme is fresh
 ```
 
-## Documentation and branding
+## Rules
 
-This file plus `skills/canvas/SKILL.md` and `llms.txt` are the agent-facing
-docs. Do not add per-vendor instruction files; if a tool generates one, fold
-useful content into `AGENTS.md` and delete it. Keep vendor names out of
-user-facing copy. Contact is hey@n3wth.com. Code lives at github.com/n3wth.
+- Theme CSS is generated — edit `n3wthTheme.ts`, run `theme:build`
+- Viewer id is per-tab (sessionStorage) — localStorage breaks echo suppression
+- Queries must not call `Date.now()` — do clock reads in mutations only
+- Convex is source of truth — client is a draft view, not authoritative
 
-<!-- ASTRYX:START -->
-Astryx v0.5.2 · 163 components
-CLI: run every command as `npx astryx <cmd>` (shown below as `astryx ...`).
+## Skill
 
-SETUP (once, in your app entry e.g. main.tsx) — without these, components render unstyled:
-  import "@astryxdesign/core/reset.css";
-  import "@astryxdesign/core/astryx.css";
+Read `skills/canvas/SKILL.md` for the full HTTP API. Smoke test:
 
-WORKFLOW — discover, don't guess. Before writing UI:
-1. `astryx build "<idea>"` — START HERE: returns a kit (closest [page] + [block]s + [component]s). No args = full playbook.
-2. `astryx template <name> [--skeleton]` — scaffold the [page]/[block]s it named, or study their layout. Templates are reference code.
-3. `astryx component <Name>` — props + examples for every component you use.
+```bash
+CANVAS_SITE_URL=… node scripts/smoke-agent.mjs
+```
 
-RULES:
-- No <div> — components do all layout/spacing, page frame included.
-- Frame first: read `astryx docs layout` before writing any page or screen — page frame, region widths, breakpoint behavior.
-- Dense data = rows (Table, List/Item), never Card-wrapped list items; Card is for standalone widgets. Status = StatusDot/Token; Badge = counts only.
-- Custom styling: component props first; else style/className with tokens — var(--color-*|--spacing-*|--radius-*). No raw hex/px. (No StyleX/Tailwind compiler here — don't use xstyle/utility classes.)
-- Tokens for every value (`astryx docs tokens`). Brand/accent belongs in the theme (`astryx theme list` / `theme add <slug>`, or `astryx theme template` for a custom one) — never override --color-* in :root.
-- SELF-CHECK before you finish: re-read the file and replace any raw <div>/<span> layout, imported .css/@apply, or hardcoded value (#hex, 16px) with the component or a token (var(--color-*|--spacing-*|…)). If unsure a component/prop exists, run `astryx component <Name>` / `astryx search "<thing>"`; don't hand-roll CSS.
-
-MORE CLI:
-  search "<query>"   find any component / hook / doc / template / block
-  component --list   163 components by category
-  template --list    page + block recipes
-  docs <topic>       browser-support, cli-integrations, color, elevation, getting-started, icons, illustrations, internationalization, layout, migration, motion, principles, shape, spacing, styling-libraries, styling, theme, tokens, typography, working-with-ai
-  swizzle <Name>     eject component source for deep customization
-  upgrade --apply    run after any @astryxdesign/core bump
-<!-- ASTRYX:END -->
-
-<!-- BEGIN:nextjs-agent-rules -->
-
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
+Contact: hey@n3wth.com
