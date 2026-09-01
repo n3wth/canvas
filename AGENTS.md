@@ -55,9 +55,42 @@ presence row and lets the client drop stale ones. A query calling `Date.now()`
 can never be cached or reused by Convex. Staleness sweeping happens in the
 heartbeat mutation, where reading the clock is fine.
 
-**No auth by design.** Canvases are public to whoever holds the URL, so Convex
-functions do not call `ctx.auth`. Slugs are random and unguessable. If auth is
-ever added, wrap the functions rather than sprinkling checks.
+**Viewing is public; agent writes should be token-gated in production.** Canvases
+are public to whoever holds the share URL (`https://canvas.n3wth.com/c/{slug}`),
+and browser Convex functions still do not call `ctx.auth`. Slugs are random and
+unguessable. The machine interface under `/agent/v1/*` accepts
+`Authorization: Bearer $CANVAS_AGENT_TOKEN` when that env is set on the Convex
+deployment (`npx convex env set CANVAS_AGENT_TOKEN <value>`). When the token is
+unset, those routes stay open (same trust model as the public mutations) so
+local/dev keep working — set the token in production.
+
+## Agent interface
+
+Household agents (Cursor, Hermes, Grok Bot, etc.) should load
+`skills/canvas/SKILL.md` and call the Convex HTTP API — not drive the browser.
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/agent/v1` | Discovery (no auth) |
+| POST | `/agent/v1/canvases` | Create (`title?`, `kind`: `html`\|`react`, `source?`) |
+| GET | `/agent/v1/canvases` | List metadata |
+| GET | `/agent/v1/canvases/:slug` | Read source + metadata |
+| PUT | `/agent/v1/canvases/:slug/source` | Replace source (hot-updates watchers) |
+
+Base URL is the Convex **site** host (`NEXT_PUBLIC_CONVEX_SITE_URL` /
+`https://<deployment>.convex.site`), not `canvas.n3wth.com`. Responses include
+a `url` field pointing at the public share link.
+
+Legacy: `POST /canvas/source` with `{slug, source}` still works; when
+`CANVAS_AGENT_TOKEN` is set it requires the same Bearer header.
+
+Optional MCP: wrap the four HTTP calls above; no separate MCP server ships in
+this repo. Portable skill copy target: `skills.n3wth.com`.
+
+Smoke: `CANVAS_SITE_URL=… [CANVAS_AGENT_TOKEN=…] node scripts/smoke-agent.mjs`
+(token required only when the deployment has one configured).
+
+Also see root `llms.txt`. Contact: hey@n3wth.com.
 
 ## Commands
 
@@ -73,11 +106,10 @@ npm run build
 
 ## Documentation and branding
 
-This file is the only agent instruction file. Do not add per-vendor agent
-files alongside it; if a tool generates one, fold its content in here and
-delete it. Keep vendor names out of user-facing copy too: the product is
-described on its own terms, not as a version of someone else's tool.
-Contact is hey@n3wth.com.
+This file plus `skills/canvas/SKILL.md` and `llms.txt` are the agent-facing
+docs. Do not add per-vendor instruction files (`CLAUDE.md`, etc.); if a tool
+generates one, fold useful content into `AGENTS.md` and delete it. Keep vendor
+names out of user-facing copy. Contact is hey@n3wth.com.
 
 <!-- ASTRYX:START -->
 Astryx v0.5.2 · 163 components

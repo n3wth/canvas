@@ -48,18 +48,33 @@ second window next to the first. Type in one.
 Previews run in a sandboxed iframe on an opaque origin, so a canvas cannot
 reach the app around it.
 
-## Pushing source from outside the browser
+## Agent / HTTP API
 
-Every canvas can be written to over HTTP, which is useful when something else
-is generating the UI and you just want to watch it land:
+Coding agents should use the authenticated agent API (see `skills/canvas/SKILL.md`
+and `AGENTS.md`). Set `CANVAS_AGENT_TOKEN` on the Convex deployment — never in git.
+
+```bash
+# Create
+curl -sS -X POST "$NEXT_PUBLIC_CONVEX_SITE_URL/agent/v1/canvases" \
+  -H "Authorization: Bearer $CANVAS_AGENT_TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"Demo","kind":"html","source":"<h1>hi</h1>"}'
+
+# Write (hot-updates https://canvas.n3wth.com/c/{slug})
+curl -sS -X PUT "$NEXT_PUBLIC_CONVEX_SITE_URL/agent/v1/canvases/$SLUG/source" \
+  -H "Authorization: Bearer $CANVAS_AGENT_TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"source":"<h1>updated</h1>"}'
+```
+
+Legacy push (same token required once `CANVAS_AGENT_TOKEN` is configured):
 
 ```bash
 curl -X POST "$NEXT_PUBLIC_CONVEX_SITE_URL/canvas/source" \
+  -H "Authorization: Bearer $CANVAS_AGENT_TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{"slug":"your-canvas-slug","source":"<h1>pushed</h1>"}'
 ```
-
-Any view of that canvas updates without a reload.
 
 ## Theme
 
