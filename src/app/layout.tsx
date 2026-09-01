@@ -17,14 +17,12 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'n3wth/canvas',
-  description:
-    'Live artifact canvases. Open a URL to see it run; show source when you need it. Every view stays in sync.',
+  description: 'Make a canvas. Share the URL. It updates.',
   metadataBase: new URL('https://canvas.n3wth.com'),
   authors: [{name: 'Oliver Newth', url: 'https://n3wth.com'}],
   openGraph: {
     title: 'n3wth/canvas',
-    description:
-      'Live artifact canvases. Open a URL to see it run; show source when you need it. Every view stays in sync.',
+    description: 'Make a canvas. Share the URL. It updates.',
     url: 'https://canvas.n3wth.com',
     siteName: 'n3wth/canvas',
   },

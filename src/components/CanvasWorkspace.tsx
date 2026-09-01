@@ -284,9 +284,7 @@ export function CanvasWorkspace({slug}: {slug: string}) {
                       <HStack gap={3} vAlign="center" hAlign="between">
                         <Text type="label">Source</Text>
                         <Text type="supporting">
-                          {canvas.kind === 'html'
-                            ? 'a whole HTML document'
-                            : 'JSX, ending in render(<Component />)'}
+                          {canvas.kind === 'html' ? 'HTML' : 'React'}
                         </Text>
                       </HStack>
                     </LayoutHeader>
@@ -325,7 +323,6 @@ export function CanvasWorkspace({slug}: {slug: string}) {
                   <LayoutHeader hasDivider>
                     <HStack gap={3} vAlign="center" hAlign="between">
                       <Text type="label">Preview</Text>
-                      <Text type="supporting">sandboxed, live</Text>
                     </HStack>
                   </LayoutHeader>
                 )

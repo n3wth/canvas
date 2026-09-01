@@ -65,12 +65,10 @@ export function CanvasIndex() {
               <VStack gap={8}>
                 <VStack gap={2} maxWidth={620}>
                   <Heading level={1} type="display-2">
-                    Live canvases
+                    Canvas
                   </Heading>
                   <Text color="secondary">
-                    Each canvas is a live artifact: the URL runs the preview,
-                    and source is there when you need it. Convex keeps every
-                    open view in sync, so the link is the share button.
+                    Make a canvas. Share the URL. It updates.
                   </Text>
                 </VStack>
 
@@ -124,7 +122,7 @@ export function CanvasIndex() {
                   {canvases?.length === 0 && (
                     <EmptyState
                       title="No canvases yet"
-                      description="Create one above. HTML gives you a whole document to own; React gives you a component compiled in the browser."
+                      description="Create one above."
                     />
                   )}
 
