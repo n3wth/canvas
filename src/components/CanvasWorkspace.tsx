@@ -30,6 +30,7 @@ import {ConnectIcon, LinkIcon, SourceIcon} from '@/components/icons';
 
 /** Presence heartbeats stay; chrome does not show viewers. */
 const SAVE_DEBOUNCE_MS = 400;
+const PREVIEW_DEBOUNCE_MS = 250;
 const HEARTBEAT_MS = 10_000;
 
 // Layout height="fill" resolves against a definite height, and the host
@@ -111,6 +112,9 @@ export function CanvasWorkspace({slug}: {slug: string}) {
     const isOwnEcho = viewer !== null && canvas.updatedBy === viewer.id;
     if (draft === null || (!isOwnEcho && canvas.source !== draft)) {
       setDraft(canvas.source);
+      if (!isOwnEcho) {
+        setPreviewSource(canvas.source);
+      }
     }
     if (previewSource === null) {
       setPreviewSource(canvas.source);
@@ -119,6 +123,14 @@ export function CanvasWorkspace({slug}: {slug: string}) {
 
   // Rebuild the frame a beat after typing stops, so a keystroke does not tear
   // down and re-run the whole preview document.
+  useEffect(() => {
+    if (draft === null || draft === previewSource) return;
+    const timer = setTimeout(
+      () => setPreviewSource(draft),
+      PREVIEW_DEBOUNCE_MS,
+    );
+    return () => clearTimeout(timer);
+  }, [draft, previewSource]);
 
   useEffect(() => {
     if (!viewer) return;
