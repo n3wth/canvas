@@ -1,11 +1,11 @@
 ---
 name: canvas
-description: Use when an agent needs a live, shareable HTML or React canvas to cowork on — create a canvas, push source, read it back, and return a hot-updating URL at https://canvas.n3wth.com/c/{slug}. Prefer this over screenshots, local preview servers, or paste-only HTML when humans or other agents should watch the result update live.
+description: Use when an agent needs a shareable HTML or React canvas to cowork on — create a canvas, push source, read it back, and return a hot-updating URL at https://canvas.n3wth.com/c/{slug}. Prefer this over screenshots, local preview servers, or paste-only HTML when humans or other agents should open the running tool by URL.
 ---
 
-# Canvas — live shareable artifacts
+# Canvas
 
-`canvas.n3wth.com` holds live artifacts: HTML or React source plus a running preview, keyed by a public slug, synced over Convex. Any watcher on the share URL hot-updates when source is written.
+`canvas.n3wth.com` holds HTML or React source plus a running preview, keyed by a public slug. Open views on the share URL update when source is written.
 
 This skill talks to the authenticated HTTP agent API. No browser. No secrets in this file — the caller supplies `CANVAS_AGENT_TOKEN` and the Convex site base URL from its own env.
 
@@ -59,9 +59,9 @@ curl -sS -X POST "$CANVAS_SITE_URL/agent/v1/canvases" \
 
 `kind` is `"html"` (default) or `"react"`. `source` optional — omit to get the starter template.
 
-Response includes `slug`, `url`, `version`. **Return `url` to the user** — that is the live canvas.
+Response includes `slug`, `url`, `version`. **Return `url` to the user** — that is the canvas to open.
 
-### 2. Write source (hot-update)
+### 2. Write source
 
 ```bash
 curl -sS -X PUT "$CANVAS_SITE_URL/agent/v1/canvases/$SLUG/source" \
@@ -112,8 +112,8 @@ Source hard limit: 512 KiB characters.
 
 ## Out of scope
 
-No Liveblocks, no drawing whiteboard, no third-party canvas products. This API is create / write source / read / list only.
+No drawing whiteboard, no third-party canvas products. This API is create / write source / read / list only.
 
 ## Portable install
 
-Copy this folder into `skills.n3wth.com` or any household agent skills root as `canvas/SKILL.md`. Point agents at it from `AGENTS.md`. Contact: hey@n3wth.com.
+Copy this folder into `skills.n3wth.com` or any household agent skills root as `canvas/SKILL.md`. Point agents at it from `AGENTS.md`. Contact: hey@n3wth.com. GitHub: https://github.com/n3wth.

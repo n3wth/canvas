@@ -16,7 +16,7 @@ export default defineSchema({
     kind: canvasKind,
     source: v.string(),
     // Bumped on every source write. Lets clients tell a local echo from a
-    // remote edit without diffing the whole document.
+    // remote edit without comparing full source text.
     version: v.number(),
     updatedAt: v.number(),
     // Visitor id of the last writer, so a client can ignore its own echo.

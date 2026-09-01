@@ -1,6 +1,6 @@
 # canvas.n3wth.com
 
-> Live HTML/React artifact canvases. Source + running preview, public slug, Convex sync.
+> Make a tool, share the URL. HTML or React source with a running preview, public slug, synced so open views follow writes.
 
 ## For agents
 
@@ -12,7 +12,7 @@ HTTP API on the Convex site host (`https://<deployment>.convex.site`):
 - `POST /agent/v1/canvases` — create (`title?`, `kind`: `html`|`react`, `source?`)
 - `GET /agent/v1/canvases` — list metadata
 - `GET /agent/v1/canvases/:slug` — read source + metadata
-- `PUT /agent/v1/canvases/:slug/source` — replace source (hot-updates watchers)
+- `PUT /agent/v1/canvases/:slug/source` — replace source (open views update)
 
 Auth: when `CANVAS_AGENT_TOKEN` is set on the Convex deployment, send
 `Authorization: Bearer $CANVAS_AGENT_TOKEN`. Never commit the token.
@@ -22,7 +22,8 @@ Share URL shape: `https://canvas.n3wth.com/c/{slug}`
 Project guidance: `AGENTS.md`
 
 Contact: hey@n3wth.com
+GitHub: https://github.com/n3wth
 
 ## Not this product
 
-Not a whiteboard. No strokes, shapes, or freehand drawing. Not Liveblocks / Tersa / eve.dev.
+Not a whiteboard. No strokes, shapes, or freehand drawing. Not a drawing or diagram tool.

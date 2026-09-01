@@ -20,6 +20,7 @@ import {
   VStack,
 } from '@astryxdesign/core/Layout';
 import {ResizeHandle, useResizable} from '@astryxdesign/core/Resizable';
+import {MoreMenu} from '@astryxdesign/core/MoreMenu';
 import {Spinner} from '@astryxdesign/core/Spinner';
 import {StatusDot} from '@astryxdesign/core/StatusDot';
 import {Text} from '@astryxdesign/core/Text';
@@ -82,15 +83,14 @@ export function CanvasWorkspace({slug}: {slug: string}) {
   const heartbeat = useMutation(api.presence.heartbeat);
   const leave = useMutation(api.presence.leave);
 
-  // Preview is the default surface. Source stays collapsed until someone
-  // asks for it. New autoSaveId so an older always-open split preference
-  // cannot force the editor back open.
+  // Running tool is the default surface. Source stays collapsed until
+  // someone opens it from the quiet overflow. No autoSaveId — a prior
+  // "source open" preference must not turn the page back into an editor.
   const split = useResizable({
     defaultSize: '40%',
     minSizePx: 280,
     collapsible: true,
     defaultIsCollapsed: true,
-    autoSaveId: 'canvas.source-pane',
   });
 
   const [draft, setDraft] = useState<string | null>(null);
@@ -247,19 +247,27 @@ export function CanvasWorkspace({slug}: {slug: string}) {
             <Text type="supporting" hasTabularNumbers>
               {status === 'pending' ? 'saving' : `v${canvas.version}`}
             </Text>
-            <Button
-              label={split.isCollapsed ? 'Show source' : 'Hide source'}
+            <MoreMenu
+              label="Canvas options"
               variant="ghost"
               size="sm"
-              onClick={() =>
-                split.isCollapsed ? split.expand() : split.collapse()
-              }
-            />
-            <Button
-              label={copied ? 'Link copied' : 'Copy link'}
-              variant="secondary"
-              size="sm"
-              onClick={handleCopyLink}
+              placement="below"
+              alignment="end"
+              items={[
+                {
+                  id: 'toggle-source',
+                  label: split.isCollapsed ? 'Show source' : 'Hide source',
+                  onClick: () =>
+                    split.isCollapsed ? split.expand() : split.collapse(),
+                },
+                {
+                  id: 'copy-link',
+                  label: copied ? 'Link copied' : 'Copy link',
+                  onClick: () => {
+                    void handleCopyLink();
+                  },
+                },
+              ]}
             />
           </HStack>
         }
