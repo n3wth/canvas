@@ -15,19 +15,87 @@ const geistMono = Geist_Mono({
   display: 'swap',
 });
 
+const siteUrl = 'https://canvas.n3wth.com';
+const siteName = 'n3wth/canvas';
+const siteDescription =
+  'Make a tool, share the URL. Create interactive HTML, React, and markdown canvases that update live.';
+
 export const metadata: Metadata = {
-  title: 'n3wth/canvas',
-  description: 'Make a tool, share the URL.',
-  metadataBase: new URL('https://canvas.n3wth.com'),
-  authors: [{name: 'Oliver Newth', url: 'https://n3wth.com'}],
-  openGraph: {
-    title: 'n3wth/canvas',
-    description: 'Make a tool, share the URL.',
-    url: 'https://canvas.n3wth.com',
-    siteName: 'n3wth/canvas',
+  title: {
+    default: siteName,
+    template: `%s — ${siteName}`,
   },
-  other: {
-    'theme-color': '#08090b',
+  description: siteDescription,
+  metadataBase: new URL(siteUrl),
+  authors: [{name: 'Oliver Newth', url: 'https://n3wth.com'}],
+  creator: 'Oliver Newth',
+  publisher: 'n3wth',
+  keywords: [
+    'canvas',
+    'code editor',
+    'live preview',
+    'HTML',
+    'React',
+    'markdown',
+    'interactive',
+    'share',
+    'tool builder',
+  ],
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    title: siteName,
+    description: siteDescription,
+    url: siteUrl,
+    siteName,
+    images: [
+      {
+        url: `${siteUrl}/api/og`,
+        width: 1200,
+        height: 630,
+        alt: siteName,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: siteName,
+    description: siteDescription,
+    images: [`${siteUrl}/api/og`],
+    creator: '@olivernewth',
+  },
+  alternates: {
+    canonical: siteUrl,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+};
+
+const jsonLdWebSite = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: siteName,
+  url: siteUrl,
+  description: siteDescription,
+  author: {
+    '@type': 'Person',
+    name: 'Oliver Newth',
+    url: 'https://n3wth.com',
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'n3wth',
+    url: 'https://n3wth.com',
+    email: 'hey@n3wth.com',
   },
 };
 
@@ -47,9 +115,18 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://api.fontshare.com/v2/css?f%5B%5D=satoshi@400,500,700,900&display=swap"
         />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{__html: JSON.stringify(jsonLdWebSite)}}
+        />
       </head>
       <body>
-        <a href="#main" className="skip-link">
+        <a
+          href="#main"
+          className="skip-link"
+          data-nosnippet=""
+          tabIndex={0}
+        >
           Skip to content
         </a>
         <Providers>{children}</Providers>
