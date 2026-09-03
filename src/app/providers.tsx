@@ -7,6 +7,7 @@ import {Theme} from '@astryxdesign/core/theme';
 import {LinkProvider} from '@astryxdesign/core/Link';
 import {n3wthTheme} from '@/theme/n3wth';
 import {BackendNotice} from '@/components/BackendNotice';
+import {PostHogProvider} from '@/components/PostHogProvider';
 
 // Inlined at build time. Absent on a deploy that has not been pointed at a
 // Convex deployment yet.
@@ -20,14 +21,16 @@ export function Providers({children}: {children: ReactNode}) {
   );
 
   return (
-    <LinkProvider component={NextLink}>
-      <Theme theme={n3wthTheme} mode="dark">
-        {convex ? (
-          <ConvexProvider client={convex}>{children}</ConvexProvider>
-        ) : (
-          <BackendNotice />
-        )}
-      </Theme>
-    </LinkProvider>
+    <PostHogProvider>
+      <LinkProvider component={NextLink}>
+        <Theme theme={n3wthTheme} mode="dark">
+          {convex ? (
+            <ConvexProvider client={convex}>{children}</ConvexProvider>
+          ) : (
+            <BackendNotice />
+          )}
+        </Theme>
+      </LinkProvider>
+    </PostHogProvider>
   );
 }
