@@ -7,6 +7,11 @@ export const canvasKind = v.union(
   v.literal('react'),
 );
 
+export const canvasVisibility = v.union(
+  v.literal('public'),
+  v.literal('unlisted'),
+);
+
 export default defineSchema({
   /**
    * A canvas: source plus the metadata needed to render it.
@@ -27,9 +32,15 @@ export default defineSchema({
     updatedAt: v.number(),
     // Visitor id of the last writer, so a client can ignore its own echo.
     updatedBy: v.optional(v.string()),
+    // 'public' = indexed in sitemap/SEO, 'unlisted' = accessible via link only.
+    // Defaults to 'unlisted' for safety — explicit opt-in to public indexing.
+    visibility: v.optional(canvasVisibility),
+    // Optional short description for SEO/OG. Extracted from first paragraph if unset.
+    description: v.optional(v.string()),
   })
     .index('by_slug', ['slug'])
-    .index('by_updatedAt', ['updatedAt']),
+    .index('by_updatedAt', ['updatedAt'])
+    .index('by_visibility', ['visibility']),
 
   /**
    * Best-effort presence. Rows are written by a heartbeat and swept by the

@@ -23,7 +23,10 @@ body {
   font-weight: 500;
 }
 
-/* Skip link — matches n3wth.com / garden */
+/* Skip link — matches n3wth.com / garden
+ * Hidden by default, slides in on focus. Uses data-nosnippet to prevent
+ * search engines from extracting "Skip to content" as the page description.
+ */
 .skip-link {
   position: absolute;
   inset-inline-start: var(--spacing-3);
@@ -34,12 +37,22 @@ body {
   background: var(--color-background-surface);
   color: var(--color-text-primary);
   border: 1px solid var(--color-border);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  text-decoration: none;
   transform: translateY(-200%);
-  transition: transform var(--duration-fast, 125ms) ease;
+  opacity: 0;
+  transition:
+    transform var(--duration-fast, 125ms) ease,
+    opacity var(--duration-fast, 125ms) ease;
 }
 
-.skip-link:focus {
+.skip-link:focus,
+.skip-link:focus-visible {
   transform: translateY(0);
+  opacity: 1;
+  outline: 2px solid var(--color-accent, #0071e3);
+  outline-offset: 2px;
 }
 
 /*

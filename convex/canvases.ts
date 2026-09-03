@@ -2,7 +2,7 @@ import {v} from 'convex/values';
 import {query, mutation, internalMutation} from './_generated/server';
 import type {MutationCtx, QueryCtx} from './_generated/server';
 import type {Doc} from './_generated/dataModel';
-import {canvasKind} from './schema';
+import {canvasKind, canvasVisibility} from './schema';
 import {generateSlug, starterFor} from './lib/templates';
 
 const MAX_SOURCE_BYTES = 512 * 1024;
@@ -17,6 +17,8 @@ const canvasDoc = v.object({
   version: v.number(),
   updatedAt: v.number(),
   updatedBy: v.optional(v.string()),
+  visibility: v.optional(canvasVisibility),
+  description: v.optional(v.string()),
 });
 
 const canvasSummary = v.object({
@@ -25,6 +27,16 @@ const canvasSummary = v.object({
   title: v.string(),
   kind: canvasKind,
   version: v.number(),
+  updatedAt: v.number(),
+  visibility: v.optional(canvasVisibility),
+});
+
+const canvasMeta = v.object({
+  slug: v.string(),
+  title: v.string(),
+  kind: canvasKind,
+  visibility: v.optional(canvasVisibility),
+  description: v.optional(v.string()),
   updatedAt: v.number(),
 });
 
@@ -67,14 +79,60 @@ export const list = query({
       .order('desc')
       .take(60);
 
-    return canvases.map(({_id, slug, title, kind, version, updatedAt}) => ({
-      _id,
-      slug,
-      title,
-      kind,
-      version,
-      updatedAt,
-    }));
+    return canvases.map(
+      ({_id, slug, title, kind, version, updatedAt, visibility}) => ({
+        _id,
+        slug,
+        title,
+        kind,
+        version,
+        updatedAt,
+        visibility,
+      }),
+    );
+  },
+});
+
+/** List public canvases for sitemap generation (metadata only). */
+export const listPublic = query({
+  args: {},
+  returns: v.array(canvasMeta),
+  handler: async (ctx) => {
+    const canvases = await ctx.db
+      .query('canvases')
+      .withIndex('by_visibility')
+      .filter((q) => q.eq(q.field('visibility'), 'public'))
+      .order('desc')
+      .take(1000);
+
+    return canvases.map(
+      ({slug, title, kind, visibility, description, updatedAt}) => ({
+        slug,
+        title,
+        kind,
+        visibility,
+        description,
+        updatedAt,
+      }),
+    );
+  },
+});
+
+/** Get canvas metadata for SEO (without source). */
+export const getMetaBySlug = query({
+  args: {slug: v.string()},
+  returns: v.union(canvasMeta, v.null()),
+  handler: async (ctx, args) => {
+    const canvas = await canvasBySlug(ctx, args.slug);
+    if (!canvas) return null;
+    return {
+      slug: canvas.slug,
+      title: canvas.title,
+      kind: canvas.kind,
+      visibility: canvas.visibility,
+      description: canvas.description,
+      updatedAt: canvas.updatedAt,
+    };
   },
 });
 
