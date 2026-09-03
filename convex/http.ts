@@ -106,13 +106,16 @@ http.route({
 
     const resolvedKind =
       kind === undefined || kind === null
-        ? 'html'
-        : kind === 'html' || kind === 'react'
+        ? 'markdown'
+        : kind === 'markdown' || kind === 'html' || kind === 'react'
           ? kind
           : null;
     if (resolvedKind === null) {
       return agentJson(
-        {error: 'Field "kind" must be "html" or "react" when provided'},
+        {
+          error:
+            'Field "kind" must be "markdown", "html", or "react" when provided',
+        },
         400,
       );
     }

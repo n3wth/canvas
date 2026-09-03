@@ -93,8 +93,37 @@ const styles = {
 render(<Counter />);
 `;
 
-export function starterFor(kind: 'html' | 'react'): string {
-  return kind === 'html' ? HTML_STARTER : REACT_STARTER;
+export const MARKDOWN_STARTER = `# Hello from your canvas
+
+Make a tool, share the URL.
+
+## What this is
+
+A shared markdown canvas. Edit the source; open views update together.
+
+- Headings, lists, and links
+- \`inline code\` and fenced blocks
+- Tables
+
+| Step | Action |
+| --- | --- |
+| 1 | Write |
+| 2 | Share the URL |
+| 3 | Cowork |
+
+\`\`\`ts
+const url = "https://canvas.n3wth.com/c/your-slug";
+\`\`\`
+
+[n3wth](https://n3wth.com)
+`;
+
+export type CanvasKind = 'markdown' | 'html' | 'react';
+
+export function starterFor(kind: CanvasKind): string {
+  if (kind === 'html') return HTML_STARTER;
+  if (kind === 'react') return REACT_STARTER;
+  return MARKDOWN_STARTER;
 }
 
 const SLUG_ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789';

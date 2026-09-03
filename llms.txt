@@ -1,6 +1,6 @@
 # canvas.n3wth.com
 
-> Make a tool, share the URL. HTML or React source with a running preview, public slug, synced so open views follow writes.
+> Make a tool, share the URL. Interactive markdown by default, public slug, synced so open views follow writes.
 
 ## For agents
 
@@ -9,7 +9,7 @@ Use the portable skill at `skills/canvas/SKILL.md` (also intended for skills.n3w
 HTTP API on the Convex site host (`https://<deployment>.convex.site`):
 
 - `GET /agent/v1` — discovery
-- `POST /agent/v1/canvases` — create (`title?`, `kind`: `html`|`react`, `source?`)
+- `POST /agent/v1/canvases` — create (`title?`, `kind?`: `markdown`|`html`|`react` default markdown, `source?`)
 - `GET /agent/v1/canvases` — list metadata
 - `GET /agent/v1/canvases/:slug` — read source + metadata
 - `PUT /agent/v1/canvases/:slug/source` — replace source (open views update)

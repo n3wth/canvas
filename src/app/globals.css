@@ -20,6 +20,7 @@ body {
 body {
   background: var(--color-background-body);
   color: var(--color-text-primary);
+  font-weight: 500;
 }
 
 /* Skip link — matches n3wth.com / garden */
@@ -196,4 +197,45 @@ body {
 .workspace-with-island > .workspace-body {
   flex: 1;
   min-height: 0;
+}
+
+
+/* —— Impeccable: home = Persuade (quiet), canvas = Operate —— */
+
+.home-page .home-hero {
+  padding-block-start: var(--spacing-6);
+}
+
+.home-page .home-display {
+  font-family: var(--font-family-display, var(--font-satoshi), sans-serif);
+  letter-spacing: -0.035em;
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.home-page .home-hero > :last-child {
+  max-width: 28rem;
+}
+
+.home-page main {
+  padding-block-end: var(--spacing-12);
+}
+
+/* Operate: the tool is the page. Tighten chrome, let the frame breathe. */
+.operate-page .workspace-actions {
+  gap: var(--spacing-0-5, 2px);
+}
+
+.operate-page .workspace-body {
+  border-block-start: 1px solid color-mix(in srgb, #fff 6%, transparent);
+}
+
+@media (max-width: 767px) {
+  .home-page .home-hero {
+    padding-block-start: var(--spacing-2);
+  }
+
+  .operate-page .workspace-actions :is(button) {
+    min-width: 2rem;
+  }
 }

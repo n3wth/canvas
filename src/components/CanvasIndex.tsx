@@ -3,7 +3,6 @@
 import {useState, type CSSProperties} from 'react';
 import {useRouter} from 'next/navigation';
 import {useMutation, useQuery} from 'convex/react';
-import {Badge} from '@astryxdesign/core/Badge';
 import {Button} from '@astryxdesign/core/Button';
 import {ClickableCard} from '@astryxdesign/core/ClickableCard';
 import {EmptyState} from '@astryxdesign/core/EmptyState';
@@ -15,10 +14,6 @@ import {
   LayoutContent,
   VStack,
 } from '@astryxdesign/core/Layout';
-import {
-  SegmentedControl,
-  SegmentedControlItem,
-} from '@astryxdesign/core/SegmentedControl';
 import {Section} from '@astryxdesign/core/Section';
 import {Spinner} from '@astryxdesign/core/Spinner';
 import {StackItem} from '@astryxdesign/core/Stack';
@@ -26,7 +21,6 @@ import {Text} from '@astryxdesign/core/Text';
 import {TextInput} from '@astryxdesign/core/TextInput';
 import {Timestamp} from '@astryxdesign/core/Timestamp';
 import {api} from '@/../convex/_generated/api';
-import type {CanvasKind} from '@/lib/preview';
 import {IslandNav} from '@/components/IslandNav';
 import {ProductFooter} from '@/components/ProductFooter';
 
@@ -38,13 +32,13 @@ export function CanvasIndex() {
   const create = useMutation(api.canvases.create);
 
   const [title, setTitle] = useState('');
-  const [kind, setKind] = useState<CanvasKind>('html');
   const [isCreating, setIsCreating] = useState(false);
 
   async function handleCreate() {
     setIsCreating(true);
     try {
-      const {slug} = await create({title, kind});
+      // Kind defaults to markdown on the server.
+      const {slug} = await create({title});
       router.push(`/c/${slug}`);
     } catch (error) {
       setIsCreating(false);
@@ -53,21 +47,21 @@ export function CanvasIndex() {
   }
 
   return (
-    <VStack className="page-with-island" gap={0}>
+    <VStack className="page-with-island home-page" gap={0}>
       <IslandNav />
       <Layout
         style={fillStyle}
         height="fill"
-        contentWidth={960}
+        contentWidth={720}
         content={
           <LayoutContent padding={8}>
             <main id="main">
               <VStack gap={8}>
-                <VStack gap={2} maxWidth={620}>
-                  <Heading level={1} type="display-2">
+                <VStack gap={3} maxWidth={520} className="home-hero">
+                  <Heading level={1} type="display-2" className="home-display">
                     Canvas
                   </Heading>
-                  <Text color="secondary">
+                  <Text color="secondary" weight="medium">
                     Make a tool, share the URL.
                   </Text>
                 </VStack>
@@ -90,14 +84,6 @@ export function CanvasIndex() {
                           }}
                         />
                       </StackItem>
-                      <SegmentedControl
-                        label="Canvas kind"
-                        value={kind}
-                        onChange={(next) => setKind(next as CanvasKind)}
-                      >
-                        <SegmentedControlItem value="html" label="HTML" />
-                        <SegmentedControlItem value="react" label="React" />
-                      </SegmentedControl>
                       <Button
                         label="Create canvas"
                         variant="primary"
@@ -135,26 +121,13 @@ export function CanvasIndex() {
                           href={`/c/${canvas.slug}`}
                         >
                           <VStack gap={3}>
-                            <HStack gap={2} vAlign="center" hAlign="between">
-                              <Text weight="medium" maxLines={1}>
-                                {canvas.title}
-                              </Text>
-                              <Badge
-                                label={canvas.kind === 'html' ? 'HTML' : 'React'}
-                                variant={
-                                  canvas.kind === 'html' ? 'orange' : 'cyan'
-                                }
-                              />
-                            </HStack>
-                            <HStack gap={2} vAlign="center" hAlign="between">
-                              <Timestamp
-                                value={new Date(canvas.updatedAt).toISOString()}
-                                format="relative_short"
-                              />
-                              <Text type="supporting" hasTabularNumbers>
-                                v{canvas.version}
-                              </Text>
-                            </HStack>
+                            <Text weight="medium" maxLines={1}>
+                              {canvas.title}
+                            </Text>
+                            <Timestamp
+                              value={new Date(canvas.updatedAt).toISOString()}
+                              format="relative_short"
+                            />
                           </VStack>
                         </ClickableCard>
                       ))}
